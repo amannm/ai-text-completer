@@ -1,0 +1,37 @@
+plugins {
+    id 'java-library'
+}
+
+group 'systems.cauldron'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // json processing
+    implementation('org.glassfish:javax.json:1+')
+
+    // test logging
+    testImplementation('org.apache.logging.log4j:log4j-api:2+')
+    testRuntimeOnly('org.apache.logging.log4j:log4j-core:2+')
+
+    // unit testing
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5+')
+    testImplementation('org.junit.jupiter:junit-jupiter-params:5+')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5+')
+
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
+}
