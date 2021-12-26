@@ -40,12 +40,7 @@ public class OpenAiCompletionProvider implements CompletionProvider {
 
     @Override
     public void complete(CompletionRequest request, Consumer<String> completionTokenHandler) {
-        if (request.maxTokens() > MAX_TOKENS_LIMIT) {
-            throw new IllegalArgumentException("maximum tokens requested cannot exceed " + MAX_TOKENS_LIMIT);
-        }
-        if (request.stopSequences().length > STOP_SEQUENCE_LIMIT) {
-            throw new IllegalArgumentException("number of stop sequences in request cannot exceed " + STOP_SEQUENCE_LIMIT);
-        }
+        validateTerminationRequest(request.terminationConfig());
         JsonObject requestJson = buildRequest(request);
         executeRequest(requestJson, completionTokenHandler);
     }
@@ -91,20 +86,29 @@ public class OpenAiCompletionProvider implements CompletionProvider {
                 .add("logprobs", JsonValue.NULL)
                 .add("echo", false)
                 .add("prompt", request.prompt())
-                .add("max_tokens", request.maxTokens())
+                .add("max_tokens", request.terminationConfig().maxTokens())
                 .add("n", 1)
                 .add("best_of", 1)
-                .add("temperature", 1.0)
-                .add("top_p", 1.0)
+                .add("temperature", request.samplingConfig().temperature())
+                .add("top_p", request.samplingConfig().topP())
                 .add("presence_penalty", 0.0)
                 .add("frequency_penalty", 0.0)
                 .add("logit_bias", Json.createObjectBuilder()
                         .add("50256", -100));
-        if (request.stopSequences().length != 0) {
+        if (request.terminationConfig().stopSequences().length != 0) {
             JsonArrayBuilder jsonStopSequences = Json.createArrayBuilder();
-            Stream.of(request.stopSequences()).forEach(jsonStopSequences::add);
+            Stream.of(request.terminationConfig().stopSequences()).forEach(jsonStopSequences::add);
             objectBuilder.add("stop", jsonStopSequences);
         }
         return objectBuilder.build();
+    }
+
+    private static void validateTerminationRequest(TerminationConfig terminationConfig) {
+        if (terminationConfig.maxTokens() > MAX_TOKENS_LIMIT) {
+            throw new IllegalArgumentException("maximum tokens requested cannot exceed " + MAX_TOKENS_LIMIT);
+        }
+        if (terminationConfig.stopSequences().length > STOP_SEQUENCE_LIMIT) {
+            throw new IllegalArgumentException("number of stop sequences in request cannot exceed " + STOP_SEQUENCE_LIMIT);
+        }
     }
 }

@@ -35,7 +35,9 @@ public class ManualTest {
 
     private void executeHelloWorldTest(CompletionProvider provider) throws InterruptedException {
         String prompt = "His first program simply printed 'Hello";
-        CompletionProvider.CompletionRequest request = new CompletionProvider.CompletionRequest(prompt, 3, new String[]{"\n"});
+        CompletionProvider.TerminationConfig terminationConfig = new CompletionProvider.TerminationConfig(3, new String[]{"\n"});
+        CompletionProvider.SamplingConfig samplingConfig = new CompletionProvider.SamplingConfig(1.0, 1.0);
+        CompletionProvider.CompletionRequest request = new CompletionProvider.CompletionRequest(prompt, terminationConfig, samplingConfig);
         CountDownLatch latch = new CountDownLatch(1);
         CopyOnWriteArrayList<String> results = new CopyOnWriteArrayList<>();
         provider.complete(request, completionToken -> {

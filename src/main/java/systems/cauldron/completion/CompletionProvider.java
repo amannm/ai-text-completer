@@ -7,7 +7,13 @@ import java.util.function.Consumer;
 
 public interface CompletionProvider {
 
-    record CompletionRequest(String prompt, int maxTokens, String[] stopSequences) {
+    record TerminationConfig(int maxTokens, String[] stopSequences) {
+    }
+
+    record SamplingConfig(double temperature, double topP) {
+    }
+
+    record CompletionRequest(String prompt, TerminationConfig terminationConfig, SamplingConfig samplingConfig) {
     }
 
     enum Type {
