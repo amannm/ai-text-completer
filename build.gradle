@@ -40,12 +40,17 @@ test {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/amannm/ai-text-completer")
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/amannm/ai-text-completer')
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = System.getenv('GITHUB_ACTOR')
+                password = System.getenv('GITHUB_TOKEN')
             }
+        }
+    }
+    publications {
+        library(MavenPublication) {
+            from components.java
         }
     }
 }
