@@ -3,6 +3,7 @@ package systems.cauldron.completion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -11,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-//@Disabled
+@Disabled
 public class ManualTest {
 
     private final static Logger LOG = LogManager.getLogger(ManualTest.class);

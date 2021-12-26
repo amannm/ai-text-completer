@@ -16,7 +16,6 @@ public class Ai21CompletionProvider implements CompletionProvider {
     public enum Engine {
         J1_LARGE,
         J1_JUMBO;
-
     }
 
     private static final int MAX_TOKENS_LIMIT = 2048;
@@ -47,33 +46,34 @@ public class Ai21CompletionProvider implements CompletionProvider {
         executeRequest(requestJson)
                 .thenAccept(response -> {
                     JsonArray completions = response.getJsonArray("completions");
-                    if (!completions.isEmpty()) {
-                        JsonObject completion = completions.getJsonObject(0);
-                        JsonObject data = completion.getJsonObject("data");
-                        JsonObject finishReason = completion.getJsonObject("finishReason");
-                        String reason = finishReason.getString("reason");
-                        String stopSequence;
-                        if ("stop".equals(reason)) {
-                            stopSequence = finishReason.getString("sequence");
-                        } else {
-                            stopSequence = null;
-                        }
-                        String text = data.getString("text");
-                        data.getJsonArray("tokens").stream().map(JsonValue::asJsonObject).forEach(token -> {
-                            if (stopSequence != null) {
-                                JsonObject generatedToken = token.getJsonObject("generatedToken");
-                                String tokenValue = generatedToken.getString("token");
-                                if (stopSequence.equals(tokenValue)) {
-                                    return;
-                                }
-                            }
-                            JsonObject textRange = token.getJsonObject("textRange");
-                            int start = textRange.getInt("start");
-                            int end = textRange.getInt("end");
-                            completionTokenHandler.accept(text.substring(start, end));
-                        });
+                    if (completions.isEmpty()) {
+                        completionTokenHandler.accept(null);
+                        return;
                     }
-                    completionTokenHandler.accept(null);
+                    JsonObject completion = completions.getJsonObject(0);
+                    JsonObject data = completion.getJsonObject("data");
+                    JsonObject finishReason = completion.getJsonObject("finishReason");
+                    String reason = finishReason.getString("reason");
+                    String stopSequence;
+                    if ("stop".equals(reason)) {
+                        stopSequence = finishReason.getString("sequence");
+                    } else {
+                        stopSequence = null;
+                    }
+                    String text = data.getString("text");
+                    data.getJsonArray("tokens").stream().map(JsonValue::asJsonObject).forEach(token -> {
+                        if (stopSequence != null) {
+                            JsonObject generatedToken = token.getJsonObject("generatedToken");
+                            String tokenValue = generatedToken.getString("token");
+                            if (stopSequence.equals(tokenValue)) {
+                                return;
+                            }
+                        }
+                        JsonObject textRange = token.getJsonObject("textRange");
+                        int start = textRange.getInt("start");
+                        int end = textRange.getInt("end");
+                        completionTokenHandler.accept(text.substring(start, end));
+                    });
                 });
     }
 

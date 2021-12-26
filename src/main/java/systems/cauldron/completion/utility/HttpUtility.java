@@ -18,13 +18,6 @@ public class HttpUtility {
                 .build();
     }
 
-    /*
-    data: {"id": "cmpl-4IngrvKGxnQYPS9DER2neTvOVVvpW", "object": "text_completion", "created": 1640386261, "choices": [{"text": " Th", "index": 0, "logprobs": null, "finish_reason": null}], "model": "davinci:2020-05-03"}
-
-
-     */
-
-
     public static HttpRequest buildRequest(JsonObject jsonObject, URI uri, String token) {
         byte[] payload = serializeJson(jsonObject);
         return HttpRequest.newBuilder()
