@@ -18,29 +18,7 @@ public class Gpt3BpeReader {
     private final Map<SymbolPair, Integer> pairLookup;
 
     public Gpt3BpeReader() {
-        Map<Integer, Integer> codepointMapping = computeCodepointMap();
-        List<SymbolPair> allPairs;
-        InputStream is = getClass().getClassLoader().getResourceAsStream("gpt3-vocab.bpe");
-        if (is == null) {
-            throw new RuntimeException("failed to load required GPT3 BPE file");
-        }
-        try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             BufferedReader br = new BufferedReader(isr)) {
-            allPairs = br.lines()
-                    .skip(1)
-                    .map(line -> {
-                        String[] pair = line.split("\\s");
-                        if (pair.length != 2) {
-                            throw new RuntimeException("malformed line in BPE file: " + line);
-                        }
-                        String first = rectifyString(pair[0], codepointMapping);
-                        String second = rectifyString(pair[1], codepointMapping);
-                        return new SymbolPair(first, second);
-                    })
-                    .toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        List<SymbolPair> allPairs = loadAllPairs();
         this.pairLookup = IntStream.range(0, allPairs.size()).boxed()
                 .collect(Collectors.toUnmodifiableMap(allPairs::get, Function.identity()));
     }
@@ -58,6 +36,33 @@ public class Gpt3BpeReader {
             }
         }
         return minPair;
+    }
+
+    private static List<SymbolPair> loadAllPairs() {
+        List<SymbolPair> allPairs;
+        Map<Integer, Integer> codepointMap = computeCodepointMap();
+        InputStream is = Gpt3BpeReader.class.getClassLoader().getResourceAsStream("gpt3-vocab.bpe");
+        if (is == null) {
+            throw new RuntimeException("failed to load required GPT3 BPE file");
+        }
+        try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             BufferedReader br = new BufferedReader(isr)) {
+            allPairs = br.lines()
+                    .skip(1)
+                    .map(line -> {
+                        String[] pair = line.split("\\s");
+                        if (pair.length != 2) {
+                            throw new RuntimeException("malformed line in BPE file: " + line);
+                        }
+                        String first = rectifyString(pair[0], codepointMap);
+                        String second = rectifyString(pair[1], codepointMap);
+                        return new SymbolPair(first, second);
+                    })
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return allPairs;
     }
 
     private static Map<Integer, Integer> computeCodepointMap() {
