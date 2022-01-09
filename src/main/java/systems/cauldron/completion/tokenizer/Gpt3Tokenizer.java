@@ -25,25 +25,27 @@ public class Gpt3Tokenizer implements Tokenizer {
     }
 
     public List<String> tokenize(String text) {
-        List<String> result = new ArrayList<>();
-        Matcher preTokenMatcher = GPT3_PRETOKEN_PATTERN.matcher(text);
-        while (preTokenMatcher.find()) {
-            String preToken = preTokenMatcher.group();
-            List<String> cachedTokens = tokenCache.computeIfAbsent(preToken, x -> {
-                List<String> tokens = initializeTokens(preToken);
-                while (true) {
-                    Set<SymbolPair> pairs = generatePairs(tokens);
-                    SymbolPair minRankPair = pairLookup.selectMinRankPair(pairs);
-                    if (minRankPair == null) {
-                        break;
-                    }
-                    tokens = mergeTokensByPair(minRankPair, tokens);
-                }
-                return tokens;
-            });
-            result.addAll(cachedTokens);
+        List<String> textTokens = new ArrayList<>();
+        Matcher preTokens = GPT3_PRETOKEN_PATTERN.matcher(text);
+        while (preTokens.find()) {
+            String preToken = preTokens.group();
+            List<String> tokens = tokenCache.computeIfAbsent(preToken, this::computeTokens);
+            textTokens.addAll(tokens);
         }
-        return result;
+        return textTokens;
+    }
+
+    private List<String> computeTokens(String preToken) {
+        List<String> tokens = initializeTokens(preToken);
+        while (true) {
+            Set<SymbolPair> pairs = generatePairs(tokens);
+            SymbolPair minRankPair = pairLookup.selectMinRankPair(pairs);
+            if (minRankPair == null) {
+                break;
+            }
+            tokens = mergeTokensByPair(minRankPair, tokens);
+        }
+        return tokens;
     }
 
     private static List<String> initializeTokens(String preToken) {
