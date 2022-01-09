@@ -60,19 +60,21 @@ public class Ai21CompletionProvider implements CompletionProvider {
                             stopSequence = null;
                         }
                         String text = data.getString("text");
-                        data.getJsonArray("tokens").stream().map(JsonValue::asJsonObject).forEach(token -> {
-                            if (stopSequence != null) {
-                                JsonObject generatedToken = token.getJsonObject("generatedToken");
-                                String tokenValue = generatedToken.getString("token");
-                                if (stopSequence.equals(tokenValue)) {
-                                    return;
-                                }
-                            }
-                            JsonObject textRange = token.getJsonObject("textRange");
-                            int start = textRange.getInt("start");
-                            int end = textRange.getInt("end");
-                            completionTokenHandler.accept(text.substring(start, end));
-                        });
+                        data.getJsonArray("tokens").stream()
+                                .map(JsonValue::asJsonObject)
+                                .forEach(token -> {
+                                    if (stopSequence != null) {
+                                        JsonObject generatedToken = token.getJsonObject("generatedToken");
+                                        String tokenValue = generatedToken.getString("token");
+                                        if (stopSequence.equals(tokenValue)) {
+                                            return;
+                                        }
+                                    }
+                                    JsonObject textRange = token.getJsonObject("textRange");
+                                    int start = textRange.getInt("start");
+                                    int end = textRange.getInt("end");
+                                    completionTokenHandler.accept(text.substring(start, end));
+                                });
                     }
                     completionTokenHandler.accept(null);
                 });
@@ -95,7 +97,8 @@ public class Ai21CompletionProvider implements CompletionProvider {
 
     private static JsonObject buildRequest(CompletionRequest request) {
         JsonArrayBuilder jsonStopSequences = Json.createArrayBuilder();
-        Stream.of(request.terminationConfig().stopSequences()).forEach(jsonStopSequences::add);
+        Stream.of(request.terminationConfig().stopSequences())
+                .forEach(jsonStopSequences::add);
         return Json.createObjectBuilder()
                 .add("prompt", request.prompt())
                 .add("maxTokens", request.terminationConfig().maxTokens())

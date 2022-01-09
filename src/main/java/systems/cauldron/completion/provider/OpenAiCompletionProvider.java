@@ -110,7 +110,8 @@ public class OpenAiCompletionProvider implements CompletionProvider {
                         .add("50256", -100));
         if (request.terminationConfig().stopSequences().length != 0) {
             JsonArrayBuilder jsonStopSequences = Json.createArrayBuilder();
-            Stream.of(request.terminationConfig().stopSequences()).forEach(jsonStopSequences::add);
+            Stream.of(request.terminationConfig().stopSequences())
+                    .forEach(jsonStopSequences::add);
             objectBuilder.add("stop", jsonStopSequences);
         }
         return objectBuilder.build();
