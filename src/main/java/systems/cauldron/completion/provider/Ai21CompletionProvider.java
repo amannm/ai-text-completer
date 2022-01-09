@@ -3,7 +3,12 @@ package systems.cauldron.completion.provider;
 import systems.cauldron.completion.CompletionProvider;
 import systems.cauldron.completion.utility.HttpUtility;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;

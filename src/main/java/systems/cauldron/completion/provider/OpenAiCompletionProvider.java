@@ -4,7 +4,13 @@ import systems.cauldron.completion.CompletionProvider;
 import systems.cauldron.completion.tokenizer.Tokenizer;
 import systems.cauldron.completion.utility.HttpUtility;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpRequest;

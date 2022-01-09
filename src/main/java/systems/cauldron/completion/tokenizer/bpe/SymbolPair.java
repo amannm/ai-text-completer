@@ -3,6 +3,11 @@ package systems.cauldron.completion.tokenizer.bpe;
 import java.util.Objects;
 
 public record SymbolPair(String first, String second) {
+
+    public String merged() {
+        return first + second;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

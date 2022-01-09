@@ -8,14 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TokenizerTest {
 
-    private static final String OPENAPI_EXAMPLE =
-            """
-                    Many words map to one token, but some don't: indivisible.
-                                
-                    Unicode characters like emojis may be split into many tokens containing the underlying bytes: 🤚🏾
-                                
-                    Sequences of characters commonly found next to each other may be grouped together: 1234567890
-                    """;
+    private static final String OPENAPI_EXAMPLE = """
+            Many words map to one token, but some don't: indivisible.
+                                       
+            Unicode characters like emojis may be split into many tokens containing the underlying bytes: 🤚🏾
+                        
+            Sequences of characters commonly found next to each other may be grouped together: 1234567890
+            """;
     public static final int OPENAPI_EXAMPLE_TOKEN_COUNT = 64;
 
     @Test

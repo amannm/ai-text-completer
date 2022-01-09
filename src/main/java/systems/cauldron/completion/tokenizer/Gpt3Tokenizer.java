@@ -58,24 +58,21 @@ public class Gpt3Tokenizer implements Tokenizer {
         return pairs;
     }
 
-    private static List<String> mergeTokensByPair(SymbolPair minRankPair, List<String> tokens) {
-        List<String> newSource = new ArrayList<>();
-        String first = minRankPair.first();
-        String second = minRankPair.second();
+    private static List<String> mergeTokensByPair(SymbolPair pair, List<String> tokens) {
+        List<String> newTokens = new ArrayList<>();
         int sourceLength = tokens.size();
         for (int i = 0; i < sourceLength; i++) {
             String current = tokens.get(i);
-            if (first.equals(current) && i < sourceLength - 1) {
+            if (i < sourceLength - 1 && current.equals(pair.first())) {
                 String next = tokens.get(i + 1);
-                if (second.equals(next)) {
-                    String merged = first + second;
-                    newSource.add(merged);
+                if (next.equals(pair.second())) {
+                    newTokens.add(pair.merged());
                     i++;
                     continue;
                 }
             }
-            newSource.add(current);
+            newTokens.add(current);
         }
-        return newSource;
+        return newTokens;
     }
 }

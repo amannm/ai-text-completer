@@ -13,9 +13,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Disabled
-public class ManualTest {
+public class CompletionTest {
 
-    private final static Logger LOG = LogManager.getLogger(ManualTest.class);
+    private final static Logger LOG = LogManager.getLogger(CompletionTest.class);
 
     @Test
     public void basicOpenAiTest() throws InterruptedException {
