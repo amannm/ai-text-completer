@@ -19,9 +19,23 @@ public class Gpt3Tokenizer implements Tokenizer {
     private final Gpt3BpeReader pairLookup;
     private final Map<String, List<String>> tokenCache;
 
-    public Gpt3Tokenizer() {
+    private static volatile Gpt3Tokenizer INSTANCE = new Gpt3Tokenizer();
+
+    private Gpt3Tokenizer() {
         this.pairLookup = new Gpt3BpeReader();
         this.tokenCache = new ConcurrentHashMap<>();
+    }
+
+    public static Gpt3Tokenizer getInstance() {
+        Gpt3Tokenizer instance = INSTANCE;
+        if (instance == null) {
+            synchronized (Gpt3Tokenizer.class) {
+                if (INSTANCE == null) {
+                    instance = INSTANCE = new Gpt3Tokenizer();
+                }
+            }
+        }
+        return instance;
     }
 
     public List<String> tokenize(String text) {

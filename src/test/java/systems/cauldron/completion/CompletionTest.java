@@ -2,7 +2,6 @@ package systems.cauldron.completion;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +10,10 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Disabled
 public class CompletionTest {
@@ -48,13 +51,20 @@ public class CompletionTest {
             }
         });
         if (!latch.await(60L, TimeUnit.SECONDS)) {
-            Assertions.fail("API request timed out");
+            fail("API request timed out");
         }
         String finalCompletion = String.join("", results);
         LOG.info("completion: |{}| => \"{}\"", String.join("|", results), finalCompletion);
         String finalPrompt = prompt + finalCompletion;
         LOG.info("final prompt: {}", finalPrompt);
         String normalizedFinalResult = finalCompletion.toLowerCase(Locale.ROOT);
-        Assertions.assertTrue(normalizedFinalResult.contains("world"));
+        assertTrue(normalizedFinalResult.contains("world"));
+        CompletionMeter meter = provider.getMeter();
+        long receivedTokenCount = meter.getReceivedTokenCount();
+        assertTrue(receivedTokenCount > 0);
+        long sentTokenCount = meter.getSentTokenCount();
+        assertTrue(sentTokenCount > 0);
+        long requestCount = meter.getRequestCount();
+        assertEquals(1, requestCount);
     }
 }

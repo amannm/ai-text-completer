@@ -2,22 +2,21 @@ package systems.cauldron.completion;
 
 import systems.cauldron.completion.provider.Ai21CompletionProvider;
 import systems.cauldron.completion.provider.OpenAiCompletionProvider;
-import systems.cauldron.completion.tokenizer.Gpt3Tokenizer;
 
 import java.util.function.Consumer;
 
-public interface CompletionProvider {
+public abstract class CompletionProvider {
 
-    record TerminationConfig(int maxTokens, String[] stopSequences) {
+    protected record TerminationConfig(int maxTokens, String[] stopSequences) {
     }
 
-    record SamplingConfig(double temperature, double topP) {
+    protected record SamplingConfig(double temperature, double topP) {
     }
 
-    record CompletionRequest(String prompt, TerminationConfig terminationConfig, SamplingConfig samplingConfig) {
+    public record CompletionRequest(String prompt, TerminationConfig terminationConfig, SamplingConfig samplingConfig) {
     }
 
-    enum Type {
+    public enum Type {
         OPENAI_DAVINCI,
         OPENAI_CURIE,
         OPENAI_BABBAGE,
@@ -26,18 +25,22 @@ public interface CompletionProvider {
         AI21_J1_JUMBO
     }
 
-    static CompletionProvider create(String apiToken, Type type) {
-        Gpt3Tokenizer tokenizer = new Gpt3Tokenizer();
+    protected final CompletionMeter meter = new CompletionMeter();
+
+    public static CompletionProvider create(String apiToken, Type type) {
         return switch (type) {
-            case OPENAI_DAVINCI -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.DAVINCI, tokenizer);
-            case OPENAI_CURIE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.CURIE, tokenizer);
-            case OPENAI_BABBAGE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.BABBAGE, tokenizer);
-            case OPENAI_ADA -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.ADA, tokenizer);
+            case OPENAI_DAVINCI -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.DAVINCI);
+            case OPENAI_CURIE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.CURIE);
+            case OPENAI_BABBAGE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.BABBAGE);
+            case OPENAI_ADA -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.ADA);
             case AI21_J1_LARGE -> new Ai21CompletionProvider(apiToken, Ai21CompletionProvider.Engine.J1_LARGE);
             case AI21_J1_JUMBO -> new Ai21CompletionProvider(apiToken, Ai21CompletionProvider.Engine.J1_JUMBO);
         };
     }
 
-    void complete(CompletionRequest request, Consumer<String> completionTokenHandler);
+    public CompletionMeter getMeter() {
+        return meter;
+    }
 
+    public abstract void complete(CompletionRequest request, Consumer<String> completionTokenHandler);
 }

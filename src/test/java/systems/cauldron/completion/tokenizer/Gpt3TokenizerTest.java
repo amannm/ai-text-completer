@@ -6,7 +6,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TokenizerTest {
+public class Gpt3TokenizerTest {
 
     private static final String OPENAPI_EXAMPLE = """
             Many words map to one token, but some don't: indivisible.
@@ -19,7 +19,7 @@ public class TokenizerTest {
 
     @Test
     public void basicTest() {
-        Gpt3Tokenizer tokenizer = new Gpt3Tokenizer();
+        Gpt3Tokenizer tokenizer = Gpt3Tokenizer.getInstance();
         List<String> tokens = tokenizer.tokenize(OPENAPI_EXAMPLE);
         assertEquals(OPENAPI_EXAMPLE_TOKEN_COUNT, tokens.size());
     }
