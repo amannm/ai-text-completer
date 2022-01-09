@@ -20,6 +20,8 @@ public class Ai21CompletionProvider implements CompletionProvider {
 
     private static final int MAX_TOKENS_LIMIT = 2048;
     private static final int STOP_SEQUENCE_LIMIT = 4;
+    private static final double TEMPERATURE_LIMIT = 5.0;
+    private static final double TOP_P_LIMIT = 1.0;
     private static final String COMPLETION_ENDPOINT_TEMPLATE = "https://api.ai21.com/studio/v1/%s/complete";
 
     private final URI completionEndpoint;
@@ -36,7 +38,7 @@ public class Ai21CompletionProvider implements CompletionProvider {
 
     @Override
     public void complete(CompletionRequest request, Consumer<String> completionTokenHandler) {
-        validateTerminationConfig(request.terminationConfig());
+        validate(request);
         JsonObject requestJson = buildRequest(request);
         executeRequest(requestJson)
                 .thenAccept(response -> {
@@ -100,12 +102,20 @@ public class Ai21CompletionProvider implements CompletionProvider {
                 .build();
     }
 
-    private static void validateTerminationConfig(TerminationConfig terminationConfig) {
+    private static void validate(CompletionRequest request) {
+        TerminationConfig terminationConfig = request.terminationConfig();
         if (terminationConfig.maxTokens() > MAX_TOKENS_LIMIT) {
             throw new IllegalArgumentException("maximum tokens requested cannot exceed " + MAX_TOKENS_LIMIT);
         }
         if (terminationConfig.stopSequences().length > STOP_SEQUENCE_LIMIT) {
             throw new IllegalArgumentException("number of stop sequences in request cannot exceed " + STOP_SEQUENCE_LIMIT);
+        }
+        SamplingConfig samplingConfig = request.samplingConfig();
+        if (samplingConfig.temperature() > TEMPERATURE_LIMIT) {
+            throw new IllegalArgumentException("temperature cannot exceed " + TEMPERATURE_LIMIT);
+        }
+        if (samplingConfig.topP() > TOP_P_LIMIT) {
+            throw new IllegalArgumentException("top-p cannot exceed " + TOP_P_LIMIT);
         }
     }
 }

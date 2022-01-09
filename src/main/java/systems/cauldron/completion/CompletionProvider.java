@@ -2,6 +2,7 @@ package systems.cauldron.completion;
 
 import systems.cauldron.completion.provider.Ai21CompletionProvider;
 import systems.cauldron.completion.provider.OpenAiCompletionProvider;
+import systems.cauldron.completion.tokenizer.Gpt3Tokenizer;
 
 import java.util.function.Consumer;
 
@@ -26,11 +27,12 @@ public interface CompletionProvider {
     }
 
     static CompletionProvider create(String apiToken, Type type) {
+        Gpt3Tokenizer tokenizer = new Gpt3Tokenizer();
         return switch (type) {
-            case OPENAI_DAVINCI -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.DAVINCI);
-            case OPENAI_CURIE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.CURIE);
-            case OPENAI_BABBAGE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.BABBAGE);
-            case OPENAI_ADA -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.ADA);
+            case OPENAI_DAVINCI -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.DAVINCI, tokenizer);
+            case OPENAI_CURIE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.CURIE, tokenizer);
+            case OPENAI_BABBAGE -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.BABBAGE, tokenizer);
+            case OPENAI_ADA -> new OpenAiCompletionProvider(apiToken, OpenAiCompletionProvider.Engine.ADA, tokenizer);
             case AI21_J1_LARGE -> new Ai21CompletionProvider(apiToken, Ai21CompletionProvider.Engine.J1_LARGE);
             case AI21_J1_JUMBO -> new Ai21CompletionProvider(apiToken, Ai21CompletionProvider.Engine.J1_JUMBO);
         };

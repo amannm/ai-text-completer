@@ -1,6 +1,7 @@
 package systems.cauldron.completion.provider;
 
 import systems.cauldron.completion.CompletionProvider;
+import systems.cauldron.completion.tokenizer.Tokenizer;
 import systems.cauldron.completion.utility.HttpUtility;
 
 import javax.json.*;
@@ -8,6 +9,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -22,12 +24,16 @@ public class OpenAiCompletionProvider implements CompletionProvider {
 
     private static final int MAX_TOKENS_LIMIT = 2048;
     private static final int STOP_SEQUENCE_LIMIT = 4;
+    //TODO: figure out actual temp limit for OpenAI
+    private static final double TEMPERATURE_LIMIT = 5.0;
+    private static final double TOP_P_LIMIT = 1.0;
     private static final String COMPLETION_ENDPOINT_TEMPLATE = "https://api.openai.com/v1/engines/%s/completions";
 
     private final URI completionEndpoint;
     private final String apiToken;
+    private final Tokenizer tokenizer;
 
-    public OpenAiCompletionProvider(String apiToken, Engine engine) {
+    public OpenAiCompletionProvider(String apiToken, Engine engine, Tokenizer tokenizer) {
         this.apiToken = apiToken;
         String engineId = switch (engine) {
             case DAVINCI -> "davinci";
@@ -36,11 +42,12 @@ public class OpenAiCompletionProvider implements CompletionProvider {
             case ADA -> "ada";
         };
         this.completionEndpoint = URI.create(String.format(COMPLETION_ENDPOINT_TEMPLATE, engineId));
+        this.tokenizer = tokenizer;
     }
 
     @Override
     public void complete(CompletionRequest request, Consumer<String> completionTokenHandler) {
-        validateTerminationRequest(request.terminationConfig());
+        validate(request);
         JsonObject requestJson = buildRequest(request);
         executeRequest(requestJson, completionTokenHandler);
     }
@@ -103,12 +110,26 @@ public class OpenAiCompletionProvider implements CompletionProvider {
         return objectBuilder.build();
     }
 
-    private static void validateTerminationRequest(TerminationConfig terminationConfig) {
-        if (terminationConfig.maxTokens() > MAX_TOKENS_LIMIT) {
+    private int getTokenCount(String prompt) {
+        List<String> tokens = tokenizer.tokenize(prompt);
+        return tokens.size();
+    }
+
+    private void validate(CompletionRequest request) {
+        TerminationConfig terminationConfig = request.terminationConfig();
+        int requestTokenCount = getTokenCount(request.prompt()) + terminationConfig.maxTokens();
+        if (requestTokenCount > MAX_TOKENS_LIMIT) {
             throw new IllegalArgumentException("maximum tokens requested cannot exceed " + MAX_TOKENS_LIMIT);
         }
         if (terminationConfig.stopSequences().length > STOP_SEQUENCE_LIMIT) {
             throw new IllegalArgumentException("number of stop sequences in request cannot exceed " + STOP_SEQUENCE_LIMIT);
+        }
+        SamplingConfig samplingConfig = request.samplingConfig();
+        if (samplingConfig.temperature() > TEMPERATURE_LIMIT) {
+            throw new IllegalArgumentException("temperature cannot exceed " + TEMPERATURE_LIMIT);
+        }
+        if (samplingConfig.topP() > TOP_P_LIMIT) {
+            throw new IllegalArgumentException("top-p cannot exceed " + TOP_P_LIMIT);
         }
     }
 }
