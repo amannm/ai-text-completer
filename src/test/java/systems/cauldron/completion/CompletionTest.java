@@ -2,6 +2,7 @@ package systems.cauldron.completion;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import systems.cauldron.completion.config.CompletionRequest;
 import systems.cauldron.completion.config.SamplingConfig;
@@ -15,7 +16,7 @@ import java.util.concurrent.SubmissionPublisher;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//@Disabled
+@Disabled
 public class CompletionTest {
 
     private final static Logger LOG = LogManager.getLogger(CompletionTest.class);
