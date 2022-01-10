@@ -1,20 +1,12 @@
 package systems.cauldron.completion;
 
+import systems.cauldron.completion.config.CompletionRequest;
 import systems.cauldron.completion.provider.Ai21CompletionProvider;
 import systems.cauldron.completion.provider.OpenAiCompletionProvider;
 
 import java.util.function.Consumer;
 
 public abstract class CompletionProvider {
-
-    protected record TerminationConfig(int maxTokens, String[] stopSequences) {
-    }
-
-    protected record SamplingConfig(double temperature, double topP) {
-    }
-
-    public record CompletionRequest(String prompt, TerminationConfig terminationConfig, SamplingConfig samplingConfig) {
-    }
 
     public enum Type {
         OPENAI_DAVINCI,

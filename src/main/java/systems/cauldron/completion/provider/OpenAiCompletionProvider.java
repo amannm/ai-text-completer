@@ -1,6 +1,9 @@
 package systems.cauldron.completion.provider;
 
 import systems.cauldron.completion.CompletionProvider;
+import systems.cauldron.completion.config.CompletionRequest;
+import systems.cauldron.completion.config.SamplingConfig;
+import systems.cauldron.completion.config.TerminationConfig;
 import systems.cauldron.completion.tokenizer.Gpt3Tokenizer;
 import systems.cauldron.completion.tokenizer.Tokenizer;
 import systems.cauldron.completion.utility.HttpUtility;

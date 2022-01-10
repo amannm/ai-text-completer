@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import systems.cauldron.completion.config.CompletionRequest;
+import systems.cauldron.completion.config.SamplingConfig;
+import systems.cauldron.completion.config.TerminationConfig;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -38,9 +41,9 @@ public class CompletionTest {
 
     private void executeHelloWorldTest(CompletionProvider provider) throws InterruptedException {
         String prompt = "His first program simply printed 'Hello";
-        CompletionProvider.TerminationConfig terminationConfig = new CompletionProvider.TerminationConfig(3, new String[]{"\n"});
-        CompletionProvider.SamplingConfig samplingConfig = new CompletionProvider.SamplingConfig(1.0, 1.0);
-        CompletionProvider.CompletionRequest request = new CompletionProvider.CompletionRequest(prompt, terminationConfig, samplingConfig);
+        TerminationConfig terminationConfig = new TerminationConfig(3, new String[]{"\n"});
+        SamplingConfig samplingConfig = new SamplingConfig(1.0, 1.0);
+        CompletionRequest request = new CompletionRequest(prompt, terminationConfig, samplingConfig);
         CountDownLatch latch = new CountDownLatch(1);
         CopyOnWriteArrayList<String> results = new CopyOnWriteArrayList<>();
         provider.complete(request, completionToken -> {
