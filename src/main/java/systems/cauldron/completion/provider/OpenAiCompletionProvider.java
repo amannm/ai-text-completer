@@ -20,7 +20,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.stream.Stream;
 
 public class OpenAiCompletionProvider extends CompletionProvider {
@@ -56,7 +56,7 @@ public class OpenAiCompletionProvider extends CompletionProvider {
     }
 
     @Override
-    public void complete(CompletionRequest request, Consumer<String> completionTokenHandler) {
+    public void complete(CompletionRequest request, SubmissionPublisher<String> completionTokenHandler) {
         TerminationConfig terminationConfig = request.terminationConfig();
         int promptTokenCount = getTokenCount(request.prompt());
         int requestMaxTokenCount = promptTokenCount + terminationConfig.maxTokens();
@@ -90,7 +90,7 @@ public class OpenAiCompletionProvider extends CompletionProvider {
                                 if (line.startsWith("data: ")) {
                                     String dataValue = line.substring(6);
                                     if ("[DONE]".equals(dataValue)) {
-                                        completionTokenHandler.accept(null);
+                                        completionTokenHandler.close();
                                     } else {
                                         JsonObject jsonResponse;
                                         try (JsonReader reader = Json.createReader(new StringReader(dataValue))) {
@@ -103,12 +103,16 @@ public class OpenAiCompletionProvider extends CompletionProvider {
                                             if (!completionText.isEmpty()) {
                                                 int receivedTokenCount = getTokenCount(completionText);
                                                 meter.addReceivedTokenCount(receivedTokenCount);
-                                                completionTokenHandler.accept(completionText);
+                                                completionTokenHandler.submit(completionText);
                                             }
                                         }
                                     }
                                 }
                             });
+                })
+                .exceptionally(throwable -> {
+                    completionTokenHandler.closeExceptionally(throwable);
+                    return null;
                 });
     }
 

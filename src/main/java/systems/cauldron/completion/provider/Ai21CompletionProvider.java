@@ -18,7 +18,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.stream.Stream;
 
 public class Ai21CompletionProvider extends CompletionProvider {
@@ -50,7 +50,7 @@ public class Ai21CompletionProvider extends CompletionProvider {
     }
 
     @Override
-    public void complete(CompletionRequest request, Consumer<String> completionTokenHandler) {
+    public void complete(CompletionRequest request, SubmissionPublisher<String> completionTokenHandler) {
         TerminationConfig terminationConfig = request.terminationConfig();
         if (terminationConfig.maxTokens() > MAX_TOKENS_LIMIT) {
             throw new IllegalArgumentException("maximum tokens requested cannot exceed " + MAX_TOKENS_LIMIT);
@@ -110,10 +110,14 @@ public class Ai21CompletionProvider extends CompletionProvider {
                                     JsonObject textRange = token.getJsonObject("textRange");
                                     int start = textRange.getInt("start");
                                     int end = textRange.getInt("end");
-                                    completionTokenHandler.accept(text.substring(start, end));
+                                    completionTokenHandler.submit(text.substring(start, end));
                                 });
                     }
-                    completionTokenHandler.accept(null);
+                    completionTokenHandler.close();
+                })
+                .exceptionally(throwable -> {
+                    completionTokenHandler.closeExceptionally(throwable);
+                    return null;
                 });
     }
 

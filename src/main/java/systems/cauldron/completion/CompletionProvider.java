@@ -4,7 +4,7 @@ import systems.cauldron.completion.config.CompletionRequest;
 import systems.cauldron.completion.provider.Ai21CompletionProvider;
 import systems.cauldron.completion.provider.OpenAiCompletionProvider;
 
-import java.util.function.Consumer;
+import java.util.concurrent.SubmissionPublisher;
 
 public abstract class CompletionProvider {
 
@@ -34,5 +34,5 @@ public abstract class CompletionProvider {
         return meter;
     }
 
-    public abstract void complete(CompletionRequest request, Consumer<String> completionTokenHandler);
+    public abstract void complete(CompletionRequest request, SubmissionPublisher<String> completionTokenHandler);
 }
