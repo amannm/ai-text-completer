@@ -37,6 +37,14 @@ public class CompletionTest {
         executeHelloWorldTest(provider);
     }
 
+    @Test
+    public void basicGooseAiTest() {
+        String apiToken = Optional.ofNullable(System.getenv("GOOSEAI_API_TOKEN"))
+                .orElseThrow(() -> new AssertionError("missing required environment variable"));
+        CompletionProvider provider = CompletionProvider.create(apiToken, CompletionProvider.Type.GOOSEAI_GPT_NEO_20B);
+        executeHelloWorldTest(provider);
+    }
+
     private void executeHelloWorldTest(CompletionProvider provider) {
         String prompt = "His first program simply printed 'Hello";
         TerminationConfig terminationConfig = new TerminationConfig(3, new String[]{"\n"});
